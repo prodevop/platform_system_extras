@@ -24,6 +24,7 @@
 #include <private/android_filesystem_capability.h>
 #endif
 
+#define XATTR_PAX_FLAGS_SUFFIX "pax.flags"
 #define XATTR_SELINUX_SUFFIX "selinux"
 #define XATTR_CAPS_SUFFIX "capability"
 
@@ -462,6 +463,11 @@ static int xattr_add(u32 inode_num, int name_index, const char *name,
 		result = xattr_addto_block(inode, name_index, name, value, value_len);
 	}
 	return result;
+}
+
+int inode_set_user_xattr(u32 inode_num, const char *key, const char *value)
+{
+	return xattr_add(inode_num, EXT4_XATTR_INDEX_USER, key, value, strlen(value));
 }
 
 int inode_set_selinux(u32 inode_num, const char *secon)

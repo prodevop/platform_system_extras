@@ -135,20 +135,6 @@ static u32 build_default_directory_structure(const char *dir_path,
 	return root_inode;
 }
 
-struct xattr {
-	const char *path;
-	const char *key;
-	const char *value;
-};
-
-static const struct xattr xattrs[] = {
-	{"/system/bin/app_process32", "pax.aids", ""},
-	{"/system/bin/app_process64", "pax.aids", ""},
-	{"/system/bin/dalvikvm32", "pax.aids", ""},
-	{"/system/bin/dalvikvm64", "pax.aids", ""},
-	{"/system/bin/mediadrmserver", "pax.flags", "em"}
-};
-
 #ifndef USE_MINGW
 /* Read a local directory and create the same tree in the generated filesystem.
    Calls itself recursively with each directory in the given directory.
@@ -166,7 +152,7 @@ static u32 build_directory_structure(const char *full_path, const char *dir_path
 	struct dirent **namelist = NULL;
 	struct stat stat;
 	int ret;
-	int i, j;
+	int i;
 	u32 inode;
 	u32 entry_inode;
 	u32 dirs = 0;
@@ -336,14 +322,6 @@ static u32 build_directory_structure(const char *full_path, const char *dir_path
 			dentries[i].mtime);
 		if (ret)
 			error("failed to set permissions on %s\n", dentries[i].path);
-
-		for (j = 0; j < sizeof(xattrs) / sizeof(xattrs[0]); j++) {
-			if (strcmp(dentries[i].path, xattrs[j].path) == 0) {
-				if (inode_set_user_xattr(entry_inode, xattrs[j].key, xattrs[j].value))
-					error("failed to set xattr on %s\n", dentries[i].path);
-				break;
-			}
-		}
 
 		/*
 		 * It's important to call inode_set_selinux() before

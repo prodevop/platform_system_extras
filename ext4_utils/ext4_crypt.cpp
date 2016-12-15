@@ -50,6 +50,7 @@ struct ext4_encryption_policy {
 #define EXT4_ENCRYPTION_MODE_AES_256_XTS    1
 #define EXT4_ENCRYPTION_MODE_AES_256_CTS    4
 #define EXT4_ENCRYPTION_MODE_PRIVATE        127
+#define EXT4_POLICY_FLAGS_PAD_32            3
 
 // ext4enc:TODO Get value from somewhere sensible
 #define EXT4_IOC_SET_ENCRYPTION_POLICY _IOR('f', 19, struct ext4_encryption_policy)
@@ -117,7 +118,7 @@ static bool e4crypt_policy_set(const char *directory, const char *policy,
     eep.version = 0;
     eep.contents_encryption_mode = contents_encryption_mode;
     eep.filenames_encryption_mode = EXT4_ENCRYPTION_MODE_AES_256_CTS;
-    eep.flags = 0;
+    eep.flags = EXT4_POLICY_FLAGS_PAD_32;
     memcpy(eep.master_key_descriptor, policy, EXT4_KEY_DESCRIPTOR_SIZE);
     if (ioctl(fd, EXT4_IOC_SET_ENCRYPTION_POLICY, &eep)) {
         PLOG(ERROR) << "Failed to set encryption policy for " << directory;
@@ -157,7 +158,7 @@ static bool e4crypt_policy_get(const char *directory, char *policy,
     if ((eep.version != 0)
             || (eep.contents_encryption_mode != contents_encryption_mode)
             || (eep.filenames_encryption_mode != EXT4_ENCRYPTION_MODE_AES_256_CTS)
-            || (eep.flags != 0)) {
+            || (eep.flags != EXT4_POLICY_FLAGS_PAD_32)) {
         LOG(ERROR) << "Failed to find matching encryption policy for " << directory;
         return false;
     }
